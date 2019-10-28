@@ -2,8 +2,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Xml.Serialization;
-using UnityEditor.AppleTV;
-using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.SocialPlatforms;
@@ -24,6 +22,7 @@ public class Pathmaker : MonoBehaviour {
 	public bool start;
 	
 	public static int GlobalTileCount;
+	public static int drugsCounter;
 
 	public Transform floorPrefab;
 	public Transform[] funThings;
@@ -38,7 +37,7 @@ public class Pathmaker : MonoBehaviour {
 
 	private void Start()
 	{
-		spawnRateControl.value = .95f;
+		
 	}
 
 	void Update ()
@@ -47,7 +46,7 @@ public class Pathmaker : MonoBehaviour {
 		{
 			SpawnTiles();
 			SpawnPathmaker();
-			SpawnPickup();
+			SpawnDrugs();
 			Turn();
 		}
 	}
@@ -61,7 +60,7 @@ public class Pathmaker : MonoBehaviour {
 	{
 		if ( GlobalTileCount < 1000)
 		{
-			randomPrefab = Random.Range(0, funThings.Length);
+			
 			
 			Transform moreFloor = Instantiate(floorPrefab, transform.position, Quaternion.identity);
 			
@@ -70,7 +69,8 @@ public class Pathmaker : MonoBehaviour {
 			transform.position += transform.forward * 5f;
 			
 			GlobalTileCount++;
-			_counter++;	
+			
+			_counter++; 
 			//Debug.Log(GlobalTileCount);
 		}
 
@@ -78,15 +78,30 @@ public class Pathmaker : MonoBehaviour {
 	}
 	
 
-	private void SpawnPickup()
+	private void SpawnDrugs()
 	{
-		int pickupCounter = 0;
-		float pickup = Random.Range(0f, 1f);
-		if (pickup > .55f && pickupCounter < 100)
-		{
-			Instantiate(funThings[randomPrefab], transform.position + new Vector3(0f,1f,0f), Quaternion.identity);
 
-			pickupCounter++;
+		float drugs = Random.Range(0f, 1f);
+		if (drugs > .55f && drugsCounter < 100)
+		{
+			randomPrefab = Random.Range(0, funThings.Length);
+			Collider[] objectsInRange = Physics.OverlapSphere(transform.position, 2f);
+			//Debug.Log(objectsInRange.Length);
+			bool drugInRange = false;
+			for (int i = 0; i < objectsInRange.Length; i++)
+			{
+				if ( objectsInRange[i].CompareTag("drugs"))
+				{
+					drugInRange = true;
+				}
+			}
+
+			if (drugInRange == false)
+			{
+				Instantiate(funThings[randomPrefab], transform.position + new Vector3(0f, 1f, 0f), Quaternion.identity);
+				drugsCounter++;
+			}
+
 		}
 	}
 

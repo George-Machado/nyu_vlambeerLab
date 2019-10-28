@@ -19,6 +19,8 @@ public class SceneMangement : MonoBehaviour
     public void Reset()
     {
         Pathmaker.GlobalTileCount = 0;
+        Pathmaker.drugsCounter = 0;
+        Pathmaker.SpawnedTiles.Clear();
         SceneManager.LoadScene(0);
         Debug.Log("reload");
     }
