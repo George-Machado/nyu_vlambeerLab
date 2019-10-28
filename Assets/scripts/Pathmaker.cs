@@ -1,111 +1,131 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Xml.Serialization;
+using UnityEditor.AppleTV;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.SocialPlatforms;
+using UnityEngine.UI;
 using Random = UnityEngine.Random;
 
 
-// MAZE PROC GEN LAB
-// all students: complete steps 1-6, as listed in this file
-// optional: if you have extra time, complete the "extra tasks" to do at the very bottom
 
-// STEP 1: ======================================================================================
-// put this script on a Sphere... it will move around, and drop a path of floor tiles behind it
 
 public class Pathmaker : MonoBehaviour {
 
-// STEP 2: ============================================================================================
-// translate the pseudocode below
 
-//	DECLARE CLASS MEMBER VARIABLES:
 
 	private int _counter;
+	public float turn;
+	float spawnRate;
 
+	public bool start;
+	
 	public static int GlobalTileCount;
 
 	public Transform floorPrefab;
+	public Transform[] funThings;
 	public Transform pathmakerSpherePrefab;
+	private int randomPrefab;
 
+	public Slider spawnRateControl;
+	
 	public static List<Transform> SpawnedTiles = new List<Transform>();
 	
-	
-//	Declare a private integer called counter that starts at 0; 		// counter var will track how many floor tiles I've instantiated
-//	Declare a public Transform called floorPrefab, assign the prefab in inspector;
-//	Declare a public Transform called pathmakerSpherePrefab, assign the prefab in inspector; 		// you'll have to make a "pathmakerSphere" prefab later
 
+
+	private void Start()
+	{
+		spawnRateControl.value = .95f;
+	}
 
 	void Update ()
 	{
-		SpawnTiles();
-
-//		If counter is less than 50, then:
-//			Generate a random number from 0.0f to 1.0f;
-//			If random number is less than 0.25f, then rotate myself 90 degrees;
-//				... Else if number is 0.25f-0.5f, then rotate myself -90 degrees;
-//				... Else if number is 0.99f-1.0f, then instantiate a pathmakerSpherePrefab clone at my current position;
-//			// end elseIf
-
-//			Instantiate a floorPrefab clone at current position;
-//			Move forward ("forward", as in, the direction I'm currently facing) by 5 units;
-//			Increment counter;
-//		Else:
-//			Destroy my game object; 		// self destruct if I've made enough tiles already
+		if (start)
+		{
+			SpawnTiles();
+			SpawnPathmaker();
+			SpawnPickup();
+			Turn();
+		}
 	}
 
-	private void SpawnTiles()
+	public void StartGen()
 	{
-		//if (GlobalTileCount < 500)
-		
-			if (_counter < 50 && GlobalTileCount < 500)
-			{
-				float randomNum = Random.Range(0f, 1f);
+		start = true;
+	}
 
-				if (randomNum < .25f && randomNum  > .20f )
-				{
-					transform.Rotate(0f, 90f, 0f);
-				}
-				else if (randomNum > 0.25f && randomNum < 0.27f)
-				{
-					transform.Rotate(0f, -90f, 0f);
-				}
-				
-				if (randomNum > .79f && randomNum < 1.0f)
-				{
-					 Instantiate(pathmakerSpherePrefab, transform.position, Quaternion.identity);
-					
-					
-				}
-
-				Transform moreFloor = Instantiate(floorPrefab, transform.position, Quaternion.identity);
-				SpawnedTiles.Add(moreFloor);
-				
-				transform.position += transform.forward * 5f;
-
-				_counter++;
-				GlobalTileCount++;
-				Debug.Log(GlobalTileCount);
-
-			}
+	public void SpawnTiles()
+	{
+		if ( GlobalTileCount < 1000)
+		{
+			randomPrefab = Random.Range(0, funThings.Length);
 			
+			Transform moreFloor = Instantiate(floorPrefab, transform.position, Quaternion.identity);
+			
+			SpawnedTiles.Add(moreFloor);
+			
+			transform.position += transform.forward * 5f;
+			
+			GlobalTileCount++;
+			_counter++;	
+			//Debug.Log(GlobalTileCount);
+		}
+
 		
+	}
+	
+
+	private void SpawnPickup()
+	{
+		int pickupCounter = 0;
+		float pickup = Random.Range(0f, 1f);
+		if (pickup > .55f && pickupCounter < 100)
+		{
+			Instantiate(funThings[randomPrefab], transform.position + new Vector3(0f,1f,0f), Quaternion.identity);
+
+			pickupCounter++;
+		}
+	}
+
+	private void SpawnPathmaker()
+	{
+		if (_counter < 50 && GlobalTileCount < 1000)
+		{
+			spawnRate = Random.Range(0f, 1f);
+
+			if (spawnRate > spawnRateControl.value)
+			{
+				Instantiate(pathmakerSpherePrefab, transform.position, Quaternion.identity);
+			}
+		}
 		else
 		{
 			Destroy(gameObject);
 		}
 	}
-
-	private void Reset()
+	private void Turn()
 	{
-		if (Input.GetKeyDown(KeyCode.R))
+		float randomNum = Random.Range(0f, 1f);
+		
+		if (randomNum < turn)
 		{
-			SceneManager.LoadScene("procgen");
+			transform.Rotate(0f, 90f, 0f);
+
+			float randomNum2 = Random.Range(0f, 1f);
+
+			if (randomNum2 > turn)
+			{
+				transform.Rotate(0f, -90f, 0f);
+			}
 		}
 	}
-} // end of class scope
 
-// MORE STEPS BELOW!!!........
+
+
+} 
 
 
 
@@ -140,7 +160,7 @@ public class Pathmaker : MonoBehaviour {
 
 // STEP 6:  =====================================================================================
 // art pass, usability pass
-
+  
 // - move the game camera to a position high in the world, and then point it down, so we can see your world get generated
 // - CHANGE THE DEFAULT UNITY COLORS, PLEASE, I'M BEGGING YOU
 // - add more detail to your original floorTile placeholder -- and let it randomly pick one of 3 different floorTile models, etc. so for example, it could randomly pick a "normal" floor tile, or a cactus, or a rock, or a skull
