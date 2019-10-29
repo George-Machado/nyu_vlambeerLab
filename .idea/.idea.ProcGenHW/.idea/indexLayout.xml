@@ -21,6 +21,7 @@
       <Path>Maya</Path>
       <Path>ProcGenDrugs</Path>
       <Path>ProcGenDrugs1</Path>
+      <Path>ProcGenDrugs2</Path>
       <Path>Temp</Path>
       <Path>obj</Path>
     </explicitExcludes>
